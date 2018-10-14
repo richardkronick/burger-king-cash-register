@@ -43,7 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfirmInput.cs" />
+    <Compile Include="FinalDisplay.cs" />
+    <Compile Include="GoodbyeMessages.cs" />
+    <Compile Include="Items.cs" />
     <Compile Include="Menu.cs" />
+    <Compile Include="NonOrderingActions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
