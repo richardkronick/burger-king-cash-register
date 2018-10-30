@@ -8,14 +8,13 @@ namespace BurgerKingCashRegister
 {
     class Program
     {
+        // user can view orders from a specific date (read from text file)
+        // set inventory and, once item reaches zero, it can no longer be ordered and is hidden
+
         static void Main(string[] args)
         {
-            // instantiate a Menu object
-            var menu = new Menu();
-            // Display welcome screen
-            Console.WriteLine("\nWelcome to Burger King! Here is the menu:\n");
-            menu.DisplayMenu();
-            Console.Read();
+            UserInterface ui = new UserInterface();
+            ui.DisplayMenu();
         }
     }
 }

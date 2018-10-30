@@ -6,11 +6,17 @@ using System.Threading.Tasks;
 
 namespace BurgerKingCashRegister
 {
-    class GoodbyeMessages
+    class GoodbyeMessage
     {
-        static Menu menu = new Menu();
+        internal void ThankYouMessage()
+        {
+            Console.Clear();
+            Console.WriteLine("\n-----------------------------------------------------------------------------");
+            Console.WriteLine("Thank you for choosing Burger King. Sorry in advance for the bathroom issues!");
+            Console.WriteLine("-----------------------------------------------------------------------------");
+        }
 
-        public void QuitMessage()
+        internal void QuitMessage()
         {
             Console.Clear();
             Console.WriteLine("-----------------------------------------------------------------------------------------");
@@ -19,15 +25,7 @@ namespace BurgerKingCashRegister
             Console.WriteLine("-----------------------------------------------------------------------------------------");
         }
 
-        public void ThankYouMessage()
-        {
-            Console.Clear();
-            Console.WriteLine("\n-----------------------------------------------------------------------------");
-            Console.WriteLine("Thank you for choosing Burger King. Sorry in advance for the bathroom issues!");
-            Console.WriteLine("-----------------------------------------------------------------------------");
-        }
-
-        public void DisplayCrown()
+        internal void DisplayCrown()
         {
             Console.WriteLine("\n\n       ___     ___     ___     ___");
             Console.WriteLine("      |   |   |   |   |   |   |   |");
@@ -48,7 +46,6 @@ namespace BurgerKingCashRegister
             Console.WriteLine("         \\      \\______/      /");
             Console.WriteLine("          \\                  /");
             Console.WriteLine("           \\________________/");
-
         }
     }
 }
