@@ -13,5 +13,7 @@ namespace BurgerKingCashRegister
         public decimal Tax { get; set; }
         public int Quantity { get; set; }
         public decimal Subtotal { get; set; }
+        public int Inventory { get; set; }
+        public int InitialInventory { get; set; }
     }
 }

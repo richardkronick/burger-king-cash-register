@@ -30,8 +30,16 @@ namespace BurgerKingCashRegister
         {
             for (int i = 0; i < order.items.Count; i++)
             {
-                Console.WriteLine($"  {i + 1}. {order.items[i].ItemName} - {(order.items[i].Price.ToString("C", CultureInfo.CurrentCulture))} " +
-                    $"--- Quantity: {order.items[i].Quantity}, Item Subtotal: {order.items[i].Subtotal}");
+                if(order.items[i].Inventory > 0)
+                {
+                    Console.WriteLine($"  {i + 1}. {order.items[i].ItemName} - {(order.items[i].Price.ToString("C", CultureInfo.CurrentCulture))} " +
+                    $"--- Quantity: {order.items[i].Quantity}, Item Subtotal: {order.items[i].Subtotal}, Available: {order.items[i].Inventory}");
+                }
+                else
+                {
+                    Console.WriteLine($"  {i + 1}. {order.items[i].ItemName} - {(order.items[i].Price.ToString("C", CultureInfo.CurrentCulture))} " +
+                    $"--- Quantity: {order.items[i].Quantity}, Item Subtotal: {order.items[i].Subtotal}, UNAVAILABLE - NO MORE INVENTORY");
+                }
             }
         }
 
