@@ -137,7 +137,7 @@ namespace BurgerKingCashRegister
                 if (DateTime.TryParse(input, out dateInput) == true)
                 {
                     Console.Clear();
-                    using (StreamReader file = File.OpenText(@"C:\Orders\order.json"))
+                    using (StreamReader file = File.OpenText(@"C:\Orders\order.json")) //generic filepath
                     {
                         var storedOrder = file.ReadToEnd();
                         var savedOrders = JsonConvert.DeserializeObject<List<SavedOrder>>(storedOrder);
@@ -264,7 +264,7 @@ namespace BurgerKingCashRegister
                 ItemSubtotal = itemSubtotals
             });
 
-            using (StreamWriter file = File.CreateText(@"C:\Orders\order.json"))
+            using (StreamWriter file = File.CreateText(@"C:\Orders\order.json")) 
             {
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.Serialize(file, previousOrders);
