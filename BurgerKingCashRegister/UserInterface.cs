@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +13,9 @@ namespace BurgerKingCashRegister
     {
         Order order = new Order();
         GoodbyeMessage bye = new GoodbyeMessage();
+
+        List<SavedOrder> previousOrders = new List<SavedOrder>();
+        bool areTherePreviousOrders = false;
 
         public int inputAsInt;
         public int inputAsIntIndex;
@@ -30,15 +34,16 @@ namespace BurgerKingCashRegister
         {
             for (int i = 0; i < order.items.Count; i++)
             {
-                if(order.items[i].Inventory > 0)
+                if (order.items[i].Inventory > 0)
                 {
                     Console.WriteLine($"  {i + 1}. {order.items[i].ItemName} - {(order.items[i].Price.ToString("C", CultureInfo.CurrentCulture))} " +
                     $"--- Quantity: {order.items[i].Quantity}, Item Subtotal: {order.items[i].Subtotal}, Available: {order.items[i].Inventory}");
                 }
+                // indicate if no inventory
                 else
                 {
                     Console.WriteLine($"  {i + 1}. {order.items[i].ItemName} - {(order.items[i].Price.ToString("C", CultureInfo.CurrentCulture))} " +
-                    $"--- Quantity: {order.items[i].Quantity}, Item Subtotal: {order.items[i].Subtotal}, UNAVAILABLE - NO MORE INVENTORY");
+                    $"--- Quantity: {order.items[i].Quantity}, Item Subtotal: {order.items[i].Subtotal}, UNAVAILABLE -- NO MORE INVENTORY");
                 }
             }
         }
@@ -71,7 +76,8 @@ namespace BurgerKingCashRegister
             }
             else if (inputAsInt == (order.items.Count + 5))
             {
-                // View previous orders from a specific date
+                ViewOrdersFromSpecificDate();
+                DisplayRepeatMenu();
             }
             else if (inputAsInt == 0)
             {
@@ -94,9 +100,15 @@ namespace BurgerKingCashRegister
             Console.WriteLine($"  Press '{order.items.Count + 1}' to quit.");
             Console.WriteLine($"  Press '{order.items.Count + 2}' to restart your order.");
             Console.WriteLine($"  Press '{order.items.Count + 3}' to remove an item.");
-            Console.WriteLine($"  Press '{order.items.Count + 4}' to change an item's quantity");
+            Console.WriteLine($"  Press '{order.items.Count + 4}' to change an item's quantity.");
+            if (areTherePreviousOrders == true) Console.WriteLine($"  Press '{order.items.Count + 5}' to view completed orders from a specific date.");
             Console.WriteLine("  Press '0' to complete your order and see your final order details.\n");
-            inputAsInt = order.ConfirmIntegerInRange(0, (order.items.Count + 4));
+
+            if (areTherePreviousOrders == true)
+                inputAsInt = order.ConfirmIntegerInRange(0, (order.items.Count + 5));
+            else if (areTherePreviousOrders == false)
+                inputAsInt = order.ConfirmIntegerInRange(0, (order.items.Count + 4));
+
             inputAsIntIndex = inputAsInt - 1;
             MenuChoice();
         }
@@ -108,6 +120,63 @@ namespace BurgerKingCashRegister
             for (int i = 0; i < order.items.Count; i++)
             {
                 Console.WriteLine($"  {i + 1}. {order.items[i].ItemName}");
+            }
+        }
+
+        private void ViewOrdersFromSpecificDate()
+        {
+            bool isValidInput = false;
+
+            while (isValidInput == false)
+            {
+                Console.WriteLine("Enter the date of the orders you want to view (as MM/DD/YYYY).");
+
+                string input = Console.ReadLine();
+
+                DateTime dateInput;
+                if (DateTime.TryParse(input, out dateInput) == true)
+                {
+                    Console.Clear();
+                    using (StreamReader file = File.OpenText(@"C:\Orders\order.json"))
+                    {
+                        var storedOrder = file.ReadToEnd();
+                        var savedOrders = JsonConvert.DeserializeObject<List<SavedOrder>>(storedOrder);
+
+                        foreach (var savedOrder in savedOrders)
+                        {
+                            if (dateInput.Year == savedOrder.TimeStamp.Year &&
+                            dateInput.Month == savedOrder.TimeStamp.Month &&
+                            dateInput.Day == savedOrder.TimeStamp.Day)
+                            {
+                                Console.WriteLine(savedOrder.TimeStamp);
+                                for (int i = 0; i < savedOrder.ItemQuantity.Count; i++)
+                                {
+                                    if (savedOrder.ItemQuantity[i] != 0)
+                                        Console.WriteLine($"{ order.items[i].ItemName } quantity: {savedOrder.ItemQuantity[i]}");
+                                }
+                                for (int j = 0; j < savedOrder.ItemQuantity.Count; j++)
+                                {
+                                    if (savedOrder.ItemQuantity[j] != 0)
+                                        Console.WriteLine($"{ order.items[j].ItemName } subtotal: {savedOrder.ItemSubtotal[j]}");
+                                }
+                                Console.WriteLine($"Subtotal: {string.Format("{0:0.00}", savedOrder.Subtotal)}");
+                                Console.WriteLine($"Tax: {string.Format("{0:0.00}", savedOrder.Tax)}");
+                                Console.WriteLine($"Total: {string.Format("{0:0.00}", savedOrder.Total)}");
+                                Console.WriteLine("---------------------------------");
+                            }
+                            else
+                                Console.WriteLine("No Orders for that date.");
+                        }
+                    }
+                    isValidInput = true;
+                    Console.WriteLine("\nPress any key to return to the menu.");
+                    Console.ReadKey();
+                }
+                else
+                {
+                    isValidInput = false;
+                    Console.WriteLine("Please enter a date as MM/DD/YYYY.");
+                }
             }
         }
 
@@ -169,24 +238,39 @@ namespace BurgerKingCashRegister
 
         private void WriteOrderToTextFile()
         {
-            List<string> orderAsList = new List<string>();
-
-            orderAsList.Add($"Order Date & Time: {DateTime.Now}");
+            // create a List<int> of item quantities
+            List<int> itemQuantities = new List<int>();
 
             for (int i = 0; i < order.items.Count; i++)
             {
-                string itemInfo = (($"Item: {order.items[i].ItemName.ToString()}") + ($", Quantity: {order.items[i].Quantity.ToString()}")
-                    + ($", Item Subtotal: {order.items[i].Subtotal.ToString()}"));
-                orderAsList.Add(itemInfo);
+                itemQuantities.Add(order.items[i].Quantity);
+            };
+
+            // create a List<decimal> of item subtotals
+            List<decimal> itemSubtotals = new List<decimal>();
+
+            for (int i = 0; i < order.items.Count; i++)
+            {
+                itemSubtotals.Add(order.items[i].Subtotal);
+            };
+
+            previousOrders.Add(new SavedOrder()
+            {
+                TimeStamp = DateTime.Now,
+                Subtotal = order.totalPrice,
+                Tax = order.totalTax,
+                Total = order.totalPrice + order.totalTax,
+                ItemQuantity = itemQuantities,
+                ItemSubtotal = itemSubtotals
+            });
+
+            using (StreamWriter file = File.CreateText(@"C:\Orders\order.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(file, previousOrders);
             }
 
-            orderAsList.Add($"Subtotal: {order.totalPrice.ToString()}");
-            orderAsList.Add($"Tax: {string.Format("{0:0.00}", order.totalTax)}");
-            orderAsList.Add($"Total: {string.Format("{0:0.00}", order.totalPrice + order.totalTax)}");
-
-            string filePathDateTime = DateTime.Now.ToString("yyyyMMdd_hhmmss");
-
-            File.WriteAllLines(@"C:\Users\rckro\Desktop\VS\order" + filePathDateTime + ".txt", orderAsList);
+            areTherePreviousOrders = true;
         }
 
         private void PlaceAnotherOrder()

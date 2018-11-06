@@ -43,7 +43,7 @@ namespace BurgerKingCashRegister
             };
             totalPrice = totalAmount;
 
-             
+
         }
 
         internal void RestartOrder()
@@ -125,7 +125,7 @@ namespace BurgerKingCashRegister
 
                 isValidInput = int.TryParse(inputAsString, out result);
 
-                if(maxValue == 0)
+                if (maxValue == 0)
                 {
                     Console.WriteLine("Sorry, that item is currently unavailable. Press any key to continue");
                     Console.ReadKey();
